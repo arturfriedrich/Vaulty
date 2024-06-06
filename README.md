@@ -1,0 +1,2 @@
+# Vaulty - a secure storage for your password
+Vaulty is a terminal-based, open-source password manager that offers an efficient and lightweight solution for storing, editing, and browsing your saved passwords. It stores your passwords locally and employs hashing techniques to ensure maximum security.
