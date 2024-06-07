@@ -2,6 +2,16 @@
 
 source colors.sh
 
+# Detect the clipboard command based on the OS
+if command -v xclip &> /dev/null; then
+    CLIP_CMD="xclip -selection clipboard"
+elif command -v pbcopy &> /dev/null; then
+    CLIP_CMD="pbcopy"
+else
+    echo "${RED}Clipboard command not found. Please install xclip or pbcopy.${NC}"
+    exit 1
+fi
+
 retrieve() {
     while true; do
         echo "${BLUE}Enter the website name to retrieve the profile: ${NC}"
@@ -22,10 +32,32 @@ retrieve() {
             echo "${GREEN}Website: $found_website${NC}"
             echo "${GREEN}Username: $username${NC}"
             echo "${GREEN}Password: $password${NC}"
+            
+            while true; do
+                echo "${BLUE}Would you like to copy the (u)sername, (p)assword, or (q)uit? ${NC}"
+                read copy_choice
+                case $copy_choice in
+                    "u")
+                        printf "%s" "$username" | $CLIP_CMD
+                        echo "${GREEN}Username copied to clipboard.${NC}"
+                        ;;
+                    "p")
+                        printf "%s" "$password" | $CLIP_CMD
+                        echo "${GREEN}Password copied to clipboard.${NC}"
+                        ;;
+                    "q")
+                        break 2
+                        ;;
+                    *)
+                        echo "${RED}Invalid choice. Please enter 'u', 'p', or 'q'.${NC}"
+                        ;;
+                esac
+            done
             break
         fi
     done
 }
+
 
 retrieve_all() {
     if [ ! -s passwords.txt ]; then
