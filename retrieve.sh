@@ -14,8 +14,14 @@ fi
 
 retrieve() {
     while true; do
-        echo "${BLUE}Enter the website name to retrieve the profile: ${NC}"
+        echo "${BLUE}Enter the website name to retrieve the profile (or enter 'q' to quit): ${NC}"
         read website
+
+        # Check if the user wants to quit
+        if [ "$website" = "q" ]; then
+            echo "${GREEN}Exiting.${NC}"
+            return
+        fi
 
         # Read the file and search for the corresponding website
         profile=$(grep "^$website," passwords.txt)
@@ -46,7 +52,8 @@ retrieve() {
                         echo "${GREEN}Password copied to clipboard.${NC}"
                         ;;
                     "q")
-                        break 2
+                        echo "${GREEN}Exiting.${NC}"
+                        return
                         ;;
                     *)
                         echo "${RED}Invalid choice. Please enter 'u', 'p', or 'q'.${NC}"
@@ -58,14 +65,14 @@ retrieve() {
     done
 }
 
-
 retrieve_all() {
     if [ ! -s passwords.txt ]; then
         echo "${RED}No profiles found.${NC}"
         return
     fi
 
-    # Read the file line by line
+    # Skip the first line (encrypted master password)
+    tail -n +2 passwords.txt |
     while IFS=',' read -r website username encrypted_password; do
         # Decrypt the password
         password=$(echo "$encrypted_password" | openssl enc -d -des3 -base64 -pass pass:mypasswd -pbkdf2)
@@ -74,5 +81,10 @@ retrieve_all() {
         echo "${GREEN}Username: $username${NC}"
         echo "${GREEN}Password: $password${NC}"
         echo "${YELLOW}-------------------------${NC}"
-    done < passwords.txt
+    done
+
+    # Check if no profiles were found
+    if [ $(wc -l < passwords.txt) -eq 1 ]; then
+        echo "${RED}No profiles found.${NC}"
+    fi
 }
