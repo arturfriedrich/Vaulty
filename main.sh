@@ -3,6 +3,7 @@
  source colors.sh
  source create.sh
  source retrieve.sh
+ source update.sh
  source delete.sh
  
  # Function to create a master password and store it in passwords.txt
@@ -45,13 +46,14 @@
  # Main menu loop
  while true; do
      echo "${BLUE}What would you like to do?${NC}"
-     echo "${YELLOW}(a)dd profile | (f)ind profile data | (r)etrieve all profile data | (d)elete profile data | (q)uit${NC}"
+     echo "${YELLOW}(a)dd profile | (f)ind profile data | (r)etrieve all profile data | (u)pdate profile data | (d)elete profile data | (q)uit${NC}"
      read choice
  
      case $choice in
          "a") create ;;
          "f") retrieve ;;
          "r") retrieve_all ;;
+         "u") update ;;
          "d") delete ;;
          "q") echo "${GREEN}Goodbye!${NC}" ; exit 0 ;;
          *) echo "${RED}Invalid choice.${NC}" ;;

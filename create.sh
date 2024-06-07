@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source colors.sh
+source password_check.sh
 
 create() {
     echo "${BLUE}Website name: ${NC}"
@@ -11,8 +12,12 @@ create() {
     read choice
     
     if [ "$choice" == "c" ]; then
-        echo "${BLUE}Password: ${NC}"
-        read password
+        while true; do
+            echo "${BLUE}Password: ${NC}"
+            read password
+            echo
+            check_password "$password" && break
+        done
     else
         password=$(openssl rand -base64 16)
     fi
