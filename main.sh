@@ -6,6 +6,38 @@ source retrieve.sh
 source update.sh
 source delete.sh
 
+
+# Function to display ASCII art in the middle of the screen
+display_ascii_art() {
+lockImg='
+                                   
+                                                          ^jEQBQDj^             
+                                                       r#@@@@@@@@@#r           
+                                                       ?@@@#x_`_v#@@@x          
+                                                       g@@@!     !@@@Q          
+                                                       Q@@@_     _@@@B          
+                                                    rgg@@@@QgggggQ@@@@ggr       
+                                                    Y@@@@@@@@@@@@@@@@@@@Y       
+                                                    Y@@@@@@@Qx^xQ@@@@@@@Y       
+                                                    Y@@@@@@@^   ~@@@@@@@Y       
+                                                    Y@@@@@@@@r r#@@@@@@@Y       
+                                                    Y@@@@@@@@c,c@@@@@@@@Y       
+                                                    Y@@@@@@@@@@@@@@@@@@@Y       
+                                                    v###################v       
+                                                                
+    '
+    
+    printf "$lockImg"
+}
+
+# Clear the screen
+clear
+
+# Display the ASCII art in the middle of the screen
+display_ascii_art
+
+echo "Welcome to Vaulty!"
+
 # Function to create a master password and store it in passwords.txt
 create_master_password() {
     echo "${BLUE}Creating a master password.${NC}"
@@ -46,7 +78,7 @@ fi
 # Main menu loop with timeout
 while true; do
     echo "${BLUE}What would you like to do?${NC}"
-    echo "${YELLOW}(a)dd profile | (f)ind profile data | (r)etrieve all profile data | (u)pdate profile data | (d)elete profile data | (q)uit${NC}"
+    echo "${YELLOW}(a)${NC}dd profile | ${YELLOW}(f)${NC}ind profile data | ${YELLOW}(r)${NC}etrieve all profile data | ${YELLOW}(u)${NC}pdate profile data | ${YELLOW}(d)${NC}elete profile data | ${YELLOW}(q)${NC}uit"
 
     # Read user input with timeout of 2 minutes (120 seconds)
     read -t 120 choice
