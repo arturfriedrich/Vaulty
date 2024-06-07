@@ -10,5 +10,6 @@ read choice
 case $choice in
     "a") create ;;
     "f") retrieve ;;
+    "r") retrieve_all ;;
     *) echo "Invalid choice." ;;
 esac

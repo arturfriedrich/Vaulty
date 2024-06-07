@@ -21,3 +21,16 @@ retrieve() {
         echo "Password: $password"
     fi
 }
+
+retrieve_all() {
+    # Read the file line by line
+    while IFS=',' read -r website username encrypted_password; do
+        # Decrypt the password
+        password=$(echo "$encrypted_password" | openssl enc -d -des3 -base64 -pass pass:mypasswd -pbkdf2)
+        
+        echo "Website: $website"
+        echo "Username: $username"
+        echo "Password: $password"
+        echo
+    done < passwords.txt
+}
