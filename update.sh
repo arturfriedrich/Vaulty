@@ -21,8 +21,8 @@ update() {
     read choice
 
     # Validate user's choice
-    while [ "$choice" != "c" ] && [ "$choice" != "g" ]; do
-        echo "${RED}Invalid choice. Please enter 'c' or 'g'.${NC}"
+    while [ "$choice" != "c" ] && [ "$choice" != "g" ] && [ -n "$choice" ]; do
+        echo "${RED}Invalid choice. Please enter 'c', 'g', or leave it blank to move forward.${NC}"
         read choice
     done
 
@@ -31,9 +31,14 @@ update() {
             echo "${BLUE}Password: ${NC}"
             read password
             echo
-            check_password "$password" && break
+            if [ -n "$password" ]; then
+                check_password "$password" && break
+            else
+                # Move forward if password is empty
+                break
+            fi
         done
-    else
+    elif [ "$choice" == "g" ]; then
         password=$(openssl rand -base64 16)
     fi
 
