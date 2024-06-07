@@ -2,6 +2,7 @@
 
 source create.sh
 source retrieve.sh
+source delete.sh
 
 echo "Welcome to Vaulty! What would you like to do?"
 echo "(a)dd profile | (f)ind profile data | (r)etrieve all profile data | (d)elete profile data | (q)uit"
@@ -11,5 +12,6 @@ case $choice in
     "a") create ;;
     "f") retrieve ;;
     "r") retrieve_all ;;
+    "d") delete ;;
     *) echo "Invalid choice." ;;
 esac
