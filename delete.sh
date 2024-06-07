@@ -1,17 +1,19 @@
 #!/bin/bash
 
+source colors.sh
+
 delete() {
-    echo "Enter the website name to delete the profile: "
+    echo "${BLUE}Enter the website name to delete the profile: ${NC}"
     read website
 
     # Check if the profile exists
     profile=$(grep "^$website," passwords.txt)
     
     if [ -z "$profile" ]; then
-        echo "No profile found for the given website."
+        echo "${RED}No profile found for the given website.${NC}"
     else
         # Delete the profile line from the file
         grep -v "^$website," passwords.txt > temp.txt && mv temp.txt passwords.txt
-        echo "Profile for $website deleted."
+        echo "${GREEN}Profile for $website deleted.${NC}"
     fi
 }

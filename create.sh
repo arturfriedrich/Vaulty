@@ -1,50 +1,18 @@
 #!/bin/bash
 
+source colors.sh
+
 create() {
-    echo "Website name: "
+    echo "${BLUE}Website name: ${NC}"
     read website
-    echo "Username: "
+    echo "${BLUE}Username: ${NC}"
     read username
-    echo "(c)reate or (g)enerate password? "
+    echo "${YELLOW}(c)reate or (g)enerate password? ${NC}"
     read choice
     
     if [ "$choice" == "c" ]; then
-        echo "Password: "
+        echo "${BLUE}Password: ${NC}"
         read password
-        # Check if password is at least 8 characters long
-        while [ ${#password} -lt 8 ]; do
-            echo "Password must be at least 8 characters long"
-            echo "Password: "
-            read password
-        done
-        
-        # Check if password contains at least one uppercase letter
-        while ! [[ "$password" =~ [A-Z] ]]; do
-            echo "Password must contain at least one uppercase letter"
-            echo "Password: "
-            read password
-        done
-        
-        # Check if password contains at least one lowercase letter
-        while ! [[ "$password" =~ [a-z] ]]; do
-            echo "Password must contain at least one lowercase letter"
-            echo "Password: "
-            read password
-        done
-        
-        # Check if password contains at least one number
-        while ! [[ "$password" =~ [0-9] ]]; do
-            echo "Password must contain at least one number"
-            echo "Password: "
-            read password
-        done
-        
-        # Check if password contains at least one special character
-        while ! [[ "$password" =~ [^a-zA-Z0-9] ]]; do
-            echo "Password must contain at least one special character"
-            echo "Password: "
-            read password
-        done
     else
         password=$(openssl rand -base64 16)
     fi
@@ -55,6 +23,5 @@ create() {
     # Save the record to the file
     echo "$website,$username,$encrypted_password" >> passwords.txt
     
-    echo "Record saved"
-    
+    echo "${GREEN}Record saved${NC}"
 }
