@@ -53,6 +53,7 @@ while true; do
 
     # Check if read timed out
     if [ $? -ne 0 ]; then
+        clear
         echo "${RED}Timeout. Exiting.${NC}"
         exit 0
     fi
@@ -63,7 +64,7 @@ while true; do
         "r") retrieve_all ;;
         "u") update ;;
         "d") delete ;;
-        "q") echo "${GREEN}Goodbye!${NC}" ; exit 0 ;;
+        "q") echo "${GREEN}Goodbye!${NC}" ; clear ; exit 0 ;;
         *) echo "${RED}Invalid choice.${NC}" ;;
     esac
 done
