@@ -6,7 +6,6 @@ source retrieve.sh
 source update.sh
 source delete.sh
 
-
 # Function to display ASCII art in the middle of the screen
 display_ascii_art() {
 lockImg='
@@ -38,6 +37,29 @@ display_ascii_art
 
 echo "Welcome to Vaulty!"
 
+hash_master_password() {
+  password="$1"
+  # Hash the password using bcrypt
+  hashed_password=$(htpasswd -bnBC 10 "" "$password" | tr -d ':\n' | sed 's/^://')
+  echo "$hashed_password"
+}
+
+verify_password() {
+  password="$1"
+  hashed_password="$2"
+  # Write the hashed password to a temporary file
+  temp_file=$(mktemp)
+  echo "user:$hashed_password" > "$temp_file"
+  # Verify the password
+  if echo "$password" | htpasswd -v -i "$temp_file" user 2>/dev/null; then
+    rm "$temp_file"
+    return 1
+  else
+    rm "$temp_file"
+    return 0
+  fi
+}
+
 # Function to create a master password and store it in passwords.txt
 create_master_password() {
     echo "${BLUE}Creating a master password.${NC}"
@@ -45,7 +67,7 @@ create_master_password() {
     read -s master_password
 
     # Encrypt the master password
-    encrypted_master_password=$(echo "$master_password" | openssl enc -e -des3 -base64 -pass pass:mypasswd -pbkdf2)
+    encrypted_master_password=$(hash_master_password "$master_password")
 
     # Store the encrypted master password in passwords.txt
     echo "$encrypted_master_password" > passwords.txt
@@ -63,16 +85,14 @@ else
     echo "${BLUE}Please enter the master password to proceed:${NC}"
     read -s entered_password
 
-    # Decrypt the master password from passwords.txt
-    master_password=$(echo "$encrypted_master_password" | openssl enc -d -des3 -base64 -pass pass:mypasswd -pbkdf2)
-
-    # Check if the entered password matches the master password
-    if [ "$entered_password" != "$master_password" ]; then
-        echo "${RED}Incorrect master password. Exiting.${NC}"
-        exit 1
+    # Verify the password
+    verify_password "$entered_password" "$encrypted_master_password"
+    if [[ $? -eq 1 ]]; then
+      echo "${GREEN}Master password accepted.${NC}"
+    else
+      echo "${RED}Incorrect master password. Exiting.${NC}"
+      exit 1
     fi
-
-    echo "${GREEN}Master password accepted.${NC}"
 fi
 
 # Main menu loop with timeout
