@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source colors.sh
-
 # Detect the clipboard command based on the OS
 if command -v xclip &> /dev/null; then
     CLIP_CMD="xclip -selection clipboard"
@@ -12,7 +10,41 @@ else
     exit 1
 fi
 
+rehash_passwords() {
+    # Generate a new random salt
+    new_salt=$(openssl rand -base64 8)
+
+    # Temporary file to store updated passwords
+    temp_file=$(mktemp)
+
+    # Read the master password and salt from the first row
+    master_password_line=$(head -n 1 passwords.txt)
+    master_password=$(echo "$master_password_line" | cut -d',' -f1)
+    salt=$(echo "$master_password_line" | cut -d',' -f2)
+    salt=$(head -c 16 /dev/urandom | base64)
+
+    # Preserve the master password without rehashing
+    echo "$master_password_line" >> "$temp_file"
+
+    # Read the remaining password records and rehash them
+    tail -n +2 passwords.txt |
+    while IFS=',' read -r website username salt encrypted_password; do
+        # Decrypt the password
+        password=$(echo "$encrypted_password" | openssl enc -d -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
+
+        # Re-encrypt the password with the new salt
+        new_encrypted_password=$(echo "$password" | openssl enc -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$new_salt")
+
+        # Append the updated record to the temp file
+        echo "$website,$username,$new_salt,$new_encrypted_password" >> "$temp_file"
+    done
+
+    # Replace the original passwords file with the updated temp file
+    mv "$temp_file" passwords.txt
+}
+
 retrieve() {
+    rehash_passwords
     while true; do
         echo "${BLUE}Enter the website name to retrieve the profile (or enter 'q' to quit): ${NC}"
         read website
@@ -30,10 +62,10 @@ retrieve() {
             echo "${RED}No profile found for the given website. Please try again.${NC}"
         else
             # Split the profile line into fields
-            IFS=',' read -r found_website username encrypted_password <<< "$profile"
+            IFS=',' read -r found_website username salt encrypted_password <<< "$profile"
             
             # Decrypt the password
-            password=$(echo "$encrypted_password" | openssl enc -d -des3 -base64 -pass pass:mypasswd -pbkdf2)
+            password=$(echo "$encrypted_password" | openssl enc -d -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
             
             echo "${GREEN}Website: $found_website${NC}"
             echo "${GREEN}Username: $username${NC}"
@@ -66,16 +98,17 @@ retrieve() {
 }
 
 retrieve_all() {
+    rehash_passwords
     if [ ! -s passwords.txt ]; then
         echo "${RED}No profiles found.${NC}"
         return
     fi
 
-    # Skip the first line (encrypted master password)
+    # Skip the first line (header)
     tail -n +2 passwords.txt |
-    while IFS=',' read -r website username encrypted_password; do
+    while IFS=',' read -r website username salt encrypted_password; do
         # Decrypt the password
-        password=$(echo "$encrypted_password" | openssl enc -d -des3 -base64 -pass pass:mypasswd -pbkdf2)
+        password=$(echo "$encrypted_password" | openssl enc -d -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
         
         echo "${GREEN}Website: $website${NC}"
         echo "${GREEN}Username: $username${NC}"

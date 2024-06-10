@@ -1,8 +1,3 @@
-#!/bin/bash
-
-source colors.sh
-source password_check.sh
-
 create() {
     echo "${BLUE}Website name: ${NC}"
     read website
@@ -22,11 +17,14 @@ create() {
         password=$(openssl rand -base64 16)
     fi
     
-    # Encrypt the password
-    encrypted_password=$(echo $password | openssl enc -e -des3 -base64 -pass pass:mypasswd -pbkdf2)
+    # Generate a random salt
+    salt=$(openssl rand -base64 16)
+    
+    # Encrypt the password with the salt
+    encrypted_password=$(echo "$password" | openssl enc -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
     
     # Save the record to the file
-    echo "$website,$username,$encrypted_password" >> passwords.txt
+    echo "$website,$username,$salt,$encrypted_password" >> passwords.txt
     
     echo "${GREEN}Record saved${NC}"
 }
