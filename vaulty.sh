@@ -97,28 +97,46 @@ else
     fi
 fi
 
-# Main menu loop with timeout
-while true; do
+# Menu options
+options=("Add profile" "Find profile data" "Retrieve all profile data" "Update profile data" "Delete profile data" "Quit")
+
+# Function to print the menu
+print_menu() {
+    clear
     printf "%b\n" "${BLUE}What would you like to do?${NC}"
-    printf "%b\n" "${YELLOW}(a)${NC}dd profile | ${YELLOW}(f)${NC}ind profile data | ${YELLOW}(r)${NC}etrieve all profile data | ${YELLOW}(u)${NC}pdate profile data | ${YELLOW}(d)${NC}elete profile data | ${YELLOW}(q)${NC}uit"
+    for i in "${!options[@]}"; do
+        if [[ $i -eq $selected ]]; then
+            printf "%b\n" "${YELLOW}> ${options[$i]}${NC}"
+        else
+            printf "  %s\n" "${options[$i]}"
+        fi
+    done
+}
 
-    # Read user input with timeout of 2 minutes (120 seconds)
-    read -t 120 choice
+# Initial selected option
+selected=0
 
-    # Check if read timed out
-    if [ $? -ne 0 ]; then
-        clear
-        printf "%b\n" "${RED}Timeout. Exiting.${NC}"
-        exit 0
-    fi
+# Main menu loop with interactive navigation
+while true; do
+    print_menu
+    read -n 1 -s key
 
-    case $choice in
-        "a") create ;;
-        "f") retrieve ;;
-        "r") retrieve_all ;;
-        "u") update ;;
-        "d") delete ;;
-        "q") printf "%b\n" "${GREEN}Goodbye!${NC}" ; clear ; exit 0 ;;
-        *) printf "%b\n" "${RED}Invalid choice.${NC}" ;;
+    case $key in
+        "w") 
+            selected=$(( (selected - 1 + ${#options[@]}) % ${#options[@]} ))
+            ;;
+        "s")
+            selected=$(( (selected + 1) % ${#options[@]} ))
+            ;;
+        "")
+            case ${options[$selected]} in
+                "Add profile") create ;;
+                "Find profile data") retrieve ;;
+                "Retrieve all profile data") retrieve_all ;;
+                "Update profile data") update ;;
+                "Delete profile data") delete ;;
+                "Quit") printf "%b\n" "${GREEN}Goodbye!${NC}" ; clear ; exit 0 ;;
+            esac
+            ;;
     esac
 done
