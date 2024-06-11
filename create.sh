@@ -1,17 +1,21 @@
+#!/bin/bash
+
 create() {
-    echo "${BLUE}Website name: ${NC}"
+    printf "%b" "${BLUE}Website name: ${NC}"
     read website
-    echo "${BLUE}Username: ${NC}"
+    printf "%b" "${BLUE}Username: ${NC}"
     read username
-    echo "${YELLOW}(c)reate or (g)enerate password? ${NC}"
+    printf "%b" "${YELLOW}(c)reate or (g)enerate password? ${NC}"
     read choice
     
     if [ "$choice" == "c" ]; then
         while true; do
-            echo "${BLUE}Password: ${NC}"
-            read password
-            echo
-            check_password "$password" && break
+            printf "%b" "${BLUE}Password: ${NC}"
+            read -s password
+            printf "\n"
+            if check_password "$password"; then
+                break
+            fi
         done
     else
         password=$(openssl rand -base64 16)
@@ -21,10 +25,11 @@ create() {
     salt=$(openssl rand -base64 16)
     
     # Encrypt the password with the salt
-    encrypted_password=$(echo "$password" | openssl enc -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
+    encrypted_password=$(printf "%s" "$password" | openssl enc -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
     
     # Save the record to the file
-    echo "$website,$username,$salt,$encrypted_password" >> passwords.txt
+    printf "%s,%s,%s,%s\n" "$website" "$username" "$salt" "$encrypted_password" >> passwords.txt
     
-    echo "${GREEN}Record saved${NC}"
+    printf "%b\n" "${GREEN}Record saved${NC}"
 }
+

@@ -6,7 +6,7 @@ if command -v xclip &> /dev/null; then
 elif command -v pbcopy &> /dev/null; then
     CLIP_CMD="pbcopy"
 else
-    echo "${RED}Clipboard command not found. Please install xclip or pbcopy.${NC}"
+    printf "%b\n" "${RED}Clipboard command not found. Please install xclip or pbcopy.${NC}"
     exit 1
 fi
 
@@ -24,7 +24,7 @@ rehash_passwords() {
     salt=$(head -c 16 /dev/urandom | base64)
 
     # Preserve the master password without rehashing
-    echo "$master_password_line" >> "$temp_file"
+    printf "%b\n" "$master_password_line" >> "$temp_file"
 
     # Read the remaining password records and rehash them
     tail -n +2 passwords.txt |
@@ -36,7 +36,7 @@ rehash_passwords() {
         new_encrypted_password=$(echo "$password" | openssl enc -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$new_salt")
 
         # Append the updated record to the temp file
-        echo "$website,$username,$new_salt,$new_encrypted_password" >> "$temp_file"
+        printf "%s,%s,%s,%s\n" "$website" "$username" "$new_salt" "$new_encrypted_password" >> "$temp_file"
     done
 
     # Replace the original passwords file with the updated temp file
@@ -46,12 +46,12 @@ rehash_passwords() {
 retrieve() {
     rehash_passwords
     while true; do
-        echo "${BLUE}Enter the website name to retrieve the profile (or enter 'q' to quit): ${NC}"
+        printf "%b" "${BLUE}Enter the website name to retrieve the profile (or enter 'q' to quit): ${NC}"
         read website
 
         # Check if the user wants to quit
         if [ "$website" = "q" ]; then
-            echo "${GREEN}Exiting.${NC}"
+            printf "%b\n" "${GREEN}Exiting.${NC}"
             return
         fi
 
@@ -59,7 +59,7 @@ retrieve() {
         profile=$(grep "^$website," passwords.txt)
         
         if [ -z "$profile" ]; then
-            echo "${RED}No profile found for the given website. Please try again.${NC}"
+            printf "%b\n" "${RED}No profile found for the given website. Please try again.${NC}"
         else
             # Split the profile line into fields
             IFS=',' read -r found_website username salt encrypted_password <<< "$profile"
@@ -67,28 +67,28 @@ retrieve() {
             # Decrypt the password
             password=$(echo "$encrypted_password" | openssl enc -d -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
             
-            echo "${GREEN}Website: $found_website${NC}"
-            echo "${GREEN}Username: $username${NC}"
-            echo "${GREEN}Password: $password${NC}"
+            printf "%b\n" "${GREEN}Website: $found_website${NC}"
+            printf "%b\n" "${GREEN}Username: $username${NC}"
+            printf "%b\n" "${GREEN}Password: $password${NC}"
             
             while true; do
-                echo "${BLUE}Would you like to copy the (u)sername, (p)assword, or (q)uit? ${NC}"
+                printf "%b" "${BLUE}Would you like to copy the (u)sername, (p)assword, or (q)uit? ${NC}"
                 read copy_choice
                 case $copy_choice in
                     "u")
                         printf "%s" "$username" | $CLIP_CMD
-                        echo "${GREEN}Username copied to clipboard.${NC}"
+                        printf "%b\n" "${GREEN}Username copied to clipboard.${NC}"
                         ;;
                     "p")
                         printf "%s" "$password" | $CLIP_CMD
-                        echo "${GREEN}Password copied to clipboard.${NC}"
+                        printf "%b\n" "${GREEN}Password copied to clipboard.${NC}"
                         ;;
                     "q")
-                        echo "${GREEN}Exiting.${NC}"
+                        printf "%b\n" "${GREEN}Exiting.${NC}"
                         return
                         ;;
                     *)
-                        echo "${RED}Invalid choice. Please enter 'u', 'p', or 'q'.${NC}"
+                        printf "%b\n" "${RED}Invalid choice. Please enter 'u', 'p', or 'q'.${NC}"
                         ;;
                 esac
             done
@@ -100,7 +100,7 @@ retrieve() {
 retrieve_all() {
     rehash_passwords
     if [ ! -s passwords.txt ]; then
-        echo "${RED}No profiles found.${NC}"
+        printf "%b\n" "${RED}No profiles found.${NC}"
         return
     fi
 
@@ -110,14 +110,14 @@ retrieve_all() {
         # Decrypt the password
         password=$(echo "$encrypted_password" | openssl enc -d -aes-128-cbc -a -salt -pbkdf2 -pass pass:"$salt")
         
-        echo "${GREEN}Website: $website${NC}"
-        echo "${GREEN}Username: $username${NC}"
-        echo "${GREEN}Password: $password${NC}"
-        echo "${YELLOW}-------------------------${NC}"
+        printf "%b\n" "${GREEN}Website: $website${NC}"
+        printf "%b\n" "${GREEN}Username: $username${NC}"
+        printf "%b\n" "${GREEN}Password: $password${NC}"
+        printf "%b\n" "${YELLOW}-------------------------${NC}"
     done
 
     # Check if no profiles were found
     if [ $(wc -l < passwords.txt) -eq 1 ]; then
-        echo "${RED}No profiles found.${NC}"
+        printf "%b\n" "${RED}No profiles found.${NC}"
     fi
 }
