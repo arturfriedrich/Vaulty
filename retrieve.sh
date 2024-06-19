@@ -116,8 +116,14 @@ retrieve_all() {
         printf "%b\n" "${YELLOW}-------------------------${NC}"
     done
 
-    # Check if no profiles were found
-    if [ $(wc -l < passwords.txt) -eq 1 ]; then
-        printf "%b\n" "${RED}No profiles found.${NC}"
-    fi
+    # Wait for the user to press 'q' to quit
+    while true; do
+        printf "%b\n" "${BLUE}Press 'q' to quit.${NC}"
+        read -n 1 -s key
+        if [ "$key" = "q" ]; then
+            printf "%b\n" "${GREEN}Exiting.${NC}"
+            return
+        fi
+    done
 }
+
